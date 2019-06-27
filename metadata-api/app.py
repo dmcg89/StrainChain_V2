@@ -46,13 +46,13 @@ STRAINS = ['Sour Diesel', 'Alaskan Thunderfuck', 'OG', 'Trainwreck', 'Girlscout 
 @app.route('/api/token/<token_id>')
 def token(token_id):
     token_id = int(token_id)
-    image_url = _compose_image(token_id)
+    # image_url = _compose_image(token_id)
 
     # num_first_names = len(FIRST_NAMES)
     # num_last_names = len(LAST_NAMES)
-    num_strains = len(STRAIN)
+    num_strains = len(STRAINS)
     # strain_name = "%s %s" % (FIRST_NAMES[token_id % num_first_names], LAST_NAMES[token_id % num_last_names])
-    strain_name = "%s %s" % (STRAINS[token_id % num_strains])
+    strain_name = "%s" % (STRAINS[token_id % num_strains])
 
     # base = BASES[token_id % len(BASES)]
     # eyes = EYES[token_id % len(EYES)]
@@ -77,7 +77,7 @@ def token(token_id):
     return jsonify({
         'name': strain_name,
         'description': "A TokinToken to represent your ownership of your strain on the StrainChain.",
-        'image': image_url,
+        # 'image': image_url,
         'external_url': 'https://openseacreatures.io/%s' % token_id,
         # 'attributes': attributes
         'attributes': []
@@ -107,7 +107,7 @@ def factory(token_id):
     name = "One Strain TokinToken"
     description = "When you purchase this option, you will receive a single OpenSea creature of a random variety. " \
                   "Enjoy and take good care of your aquatic being!"
-    image_url = _compose_image(['images/factory/egg.png'], token_id, "factory")
+    # image_url = _compose_image(['images/factory/egg.png'], token_id, "factory")
     num_inside = 1
     attributes = []
     _add_attribute(attributes, 'number_inside', [num_inside], token_id)
@@ -115,7 +115,7 @@ def factory(token_id):
     return jsonify({
         'name': name,
         'description': description,
-        'image': image_url,
+        # 'image': image_url,
         'external_url': 'https://openseacreatures.io/%s' % token_id,
         'attributes': attributes
     })
@@ -131,11 +131,13 @@ def _add_attribute(existing, attribute_name, options, token_id, display_type=Non
     existing.append(trait)
 
 
-def _compose_image(image_files, token_id, path="token"):
+def _compose_image(token_id, path="token"):
 
     bkg = Image.new('RGBA', (COIN_SIZE + COIN_PADDING, COIN_SIZE + COIN_PADDING), (0, 0, 0, 0))
     draw = ImageDraw.Draw(bkg)
     draw.ellipse((COIN_PADDING, COIN_PADDING, COIN_SIZE, COIN_SIZE))
+    base_img = COIN
+    base = Image.open(base_img).convert("RGBA")
     output_path = "images/output/%s.png" % token_id
     composite = Image.alpha_composite(bkg, base)
     composite.save(output_path)

@@ -3,7 +3,6 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Factory.sol";
 import "./Token.sol";
-import "./TokenLootBox.sol";
 import "./Strings.sol";
 
 contract TokenFactory is Factory, Ownable {
@@ -11,35 +10,24 @@ contract TokenFactory is Factory, Ownable {
 
   address public proxyRegistryAddress;
   address public nftAddress;
-  address public lootBoxNftAddress;
-  string public baseURI = "https://opensea-Tokens-api.herokuapp.com/api/factory/";
+  string public baseURI = "http://127.0.0.1:5000/api/factory/";
 
   /**
-   * Enforce the existence of only 100 OpenSea Tokens.
+   * @dev Enforce the existence of only 16,777,216 Tokens (2^24).
    */
-  uint256 Token_SUPPLY = 100;
-
-  /**
-   * Three different options for minting Tokens (basic, premium, and gold).
-   */
-  uint256 NUM_OPTIONS = 3;
-  uint256 SINGLE_Token_OPTION = 0;
-  uint256 MULTIPLE_Token_OPTION = 1;
-  uint256 LOOTBOX_OPTION = 2;
-  uint256 NUM_TokenS_IN_MULTIPLE_Token_OPTION = 4;
+  uint256 TOKEN_SUPPLY = 16777216;
 
   constructor(address _proxyRegistryAddress, address _nftAddress) public {
     proxyRegistryAddress = _proxyRegistryAddress;
     nftAddress = _nftAddress;
-    lootBoxNftAddress = address(new TokenLootBox(_proxyRegistryAddress, address(this)));
   }
 
   function name() external view returns (string memory) {
-    return "OpenSeaToken Item Sale";
+    return "Token Token Sale";
   }
 
   function symbol() external view returns (string memory) {
-    return "CPF";
+    return "RGBF";
   }
 
   function supportsFactoryInterface() public view returns (bool) {
@@ -47,53 +35,27 @@ contract TokenFactory is Factory, Ownable {
   }
 
   function numOptions() public view returns (uint256) {
-    return NUM_OPTIONS;
+    return 1;
   }
-  
+
   function mint(uint256 _optionId, address _toAddress) public {
     // Must be sent from the owner proxy or owner.
     ProxyRegistry proxyRegistry = ProxyRegistry(proxyRegistryAddress);
-    assert(address(proxyRegistry.proxies(owner())) == msg.sender || owner() == msg.sender || msg.sender == lootBoxNftAddress);
-    require(canMint(_optionId));
+    assert(address(proxyRegistry.proxies(owner())) == msg.sender || owner() == msg.sender);
+    require(canMint());
 
-    Token openSeaToken = Token(nftAddress);
-    if (_optionId == SINGLE_Token_OPTION) {
-      openSeaToken.mintTo(_toAddress);
-    } else if (_optionId == MULTIPLE_Token_OPTION) {
-      for (uint256 i = 0; i < NUM_TokenS_IN_MULTIPLE_Token_OPTION; i++) {
-        openSeaToken.mintTo(_toAddress);
-      }
-    } else if (_optionId == LOOTBOX_OPTION) {
-      TokenLootBox openSeaTokenLootBox = TokenLootBox(lootBoxNftAddress);
-      openSeaTokenLootBox.mintTo(_toAddress);
-    } 
+    Token coin = Token(nftAddress);
+    coin.mintTo(_toAddress);
   }
 
-  function canMint(uint256 _optionId) public view returns (bool) {
-    if (_optionId >= NUM_OPTIONS) {
-      return false;
-    }
-
-    Token openSeaToken = Token(nftAddress);
-    uint256 TokenSupply = openSeaToken.totalSupply();
-
-    uint256 numItemsAllocated = 0;
-    if (_optionId == SINGLE_Token_OPTION) {
-      numItemsAllocated = 1;
-    } else if (_optionId == MULTIPLE_Token_OPTION) {
-      numItemsAllocated = NUM_TokenS_IN_MULTIPLE_Token_OPTION;
-    } else if (_optionId == LOOTBOX_OPTION) {
-      TokenLootBox openSeaTokenLootBox = TokenLootBox(lootBoxNftAddress);
-      numItemsAllocated = openSeaTokenLootBox.itemsPerLootbox();
-    }
-    return TokenSupply < (Token_SUPPLY - numItemsAllocated);
+  function canMint() public view returns (bool) {
+    Token coin = Token(nftAddress);
+    uint256 coinSupplyPlusOne = coin.totalSupply() + 1;
+    return coinSupplyPlusOne <= TOKEN_SUPPLY;
   }
-  
+
   function tokenURI(uint256 _optionId) external view returns (string memory) {
-    return Strings.strConcat(
-        baseURI,
-        Strings.uint2str(_optionId)
-    );
+    return Strings.strConcat(baseURI, Strings.uint2str(_optionId));
   }
 
   /**

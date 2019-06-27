@@ -1,5 +1,5 @@
 
-# Danish String Quarteet
+# Danish String Quartet
 
 import os
 import mimetypes
@@ -10,10 +10,12 @@ from flask import jsonify
 from google.cloud import storage
 from google.oauth2 import service_account
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
-GOOGLE_STORAGE_PROJECT = os.environ['GOOGLE_STORAGE_PROJECT']
-GOOGLE_STORAGE_BUCKET = os.environ['GOOGLE_STORAGE_BUCKET']
+GOOGLE_STORAGE_PROJECT = "StrainChain"
+GOOGLE_STORAGE_BUCKET = "strainchain_tokens"
+
+COIN = 'images/coin/pot_token.png'
 COIN_PADDING = 3
 COIN_SIZE = 268 - COIN_PADDING
 
@@ -21,6 +23,7 @@ app = Flask(__name__)
 
 # FIRST_NAMES = ['Herbie', 'Sprinkles', 'Boris', 'Dave', 'Randy', 'Captain']
 # LAST_NAMES = ['Starbelly', 'Fisherton', 'McCoy']
+STRAINS = ['Sour Diesel', 'Alaskan Thunderfuck', 'OG', 'Trainwreck', 'Girlscout Cookies']
 
 # BASES = ['jellyfish', 'starfish', 'crab', 'narwhal', 'tealfish', 'goldfish']
 # EYES = ['big', 'joy', 'wink', 'sleepy', 'content']
@@ -47,7 +50,9 @@ def token(token_id):
 
     # num_first_names = len(FIRST_NAMES)
     # num_last_names = len(LAST_NAMES)
-    # creature_name = "%s %s" % (FIRST_NAMES[token_id % num_first_names], LAST_NAMES[token_id % num_last_names])
+    num_strains = len(STRAIN)
+    # strain_name = "%s %s" % (FIRST_NAMES[token_id % num_first_names], LAST_NAMES[token_id % num_last_names])
+    strain_name = "%s %s" % (STRAINS[token_id % num_strains])
 
     # base = BASES[token_id % len(BASES)]
     # eyes = EYES[token_id % len(EYES)]
@@ -70,11 +75,12 @@ def token(token_id):
 
 
     return jsonify({
-        'name': creature_name,
-        'description': "Friendly OpenSea Creature that enjoys long swims in the ocean.",
+        'name': strain_name,
+        'description': "A TokinToken to represent your ownership of your strain on the StrainChain.",
         'image': image_url,
         'external_url': 'https://openseacreatures.io/%s' % token_id,
-        'attributes': attributes
+        # 'attributes': attributes
+        'attributes': []
     })
 
 
@@ -98,7 +104,7 @@ def token(token_id):
 @app.route('/api/factory/<token_id>')
 def factory(token_id):
     token_id = int(token_id)
-    name = "One OpenSea creature"
+    name = "One Strain TokinToken"
     description = "When you purchase this option, you will receive a single OpenSea creature of a random variety. " \
                   "Enjoy and take good care of your aquatic being!"
     image_url = _compose_image(['images/factory/egg.png'], token_id, "factory")
@@ -126,16 +132,12 @@ def _add_attribute(existing, attribute_name, options, token_id, display_type=Non
 
 
 def _compose_image(image_files, token_id, path="token"):
-    composite = None
-    for image_file in image_files:
-        foreground = Image.open(image_file).convert("RGBA")
 
-        if composite:
-            composite = Image.alpha_composite(composite, foreground)
-        else:
-            composite = foreground
-
+    bkg = Image.new('RGBA', (COIN_SIZE + COIN_PADDING, COIN_SIZE + COIN_PADDING), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(bkg)
+    draw.ellipse((COIN_PADDING, COIN_PADDING, COIN_SIZE, COIN_SIZE))
     output_path = "images/output/%s.png" % token_id
+    composite = Image.alpha_composite(bkg, base)
     composite.save(output_path)
 
     blob = _get_bucket().blob(f"{path}/{token_id}.png")
@@ -144,10 +146,13 @@ def _compose_image(image_files, token_id, path="token"):
 
 
 def _get_bucket():
-    credentials = service_account.Credentials.from_service_account_file('credentials/google-storage-credentials.json')
+    credentials = service_account.Credentials.from_service_account_file(
+        'credentials.json')
     if credentials.requires_scopes:
-        credentials = credentials.with_scopes(['https://www.googleapis.com/auth/devstorage.read_write'])
-    client = storage.Client(project=GOOGLE_STORAGE_PROJECT, credentials=credentials)
+        credentials = credentials.with_scopes(
+            ['https://www.googleapis.com/auth/devstorage.read_write'])
+    client = storage.Client(
+        project=GOOGLE_STORAGE_PROJECT, credentials=credentials)
     return client.get_bucket(GOOGLE_STORAGE_BUCKET)
 
 

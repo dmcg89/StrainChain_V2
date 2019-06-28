@@ -17,7 +17,8 @@ GOOGLE_STORAGE_BUCKET = "strainchain_tokens"
 
 COIN = 'images/coin/pot_token.png'
 COIN_PADDING = 3
-COIN_SIZE = 268 - COIN_PADDING
+COIN_SIZE = 400 - COIN_PADDING
+
 
 app = Flask(__name__)
 
@@ -46,7 +47,7 @@ STRAINS = ['Sour Diesel', 'Alaskan Thunderfuck', 'OG', 'Trainwreck', 'Girlscout 
 @app.route('/api/token/<token_id>')
 def token(token_id):
     token_id = int(token_id)
-    # image_url = _compose_image(token_id)
+    image_url = _compose_image(token_id)
 
     # num_first_names = len(FIRST_NAMES)
     # num_last_names = len(LAST_NAMES)

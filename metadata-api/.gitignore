@@ -1,6 +1,0 @@
-env/
-.idea/
-credentials.json
-.env
-.images/
-*.pyc

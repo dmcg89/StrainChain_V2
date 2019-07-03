@@ -11,6 +11,6 @@ contract Token is TradeableERC721Token {
   constructor(address _proxyRegistryAddress) TradeableERC721Token("Token", "TT", _proxyRegistryAddress) public {  }
 
   function baseTokenURI() public view returns (string memory) {
-    return "http://127.0.0.1:5000/api/token/";
+    return "https://flannel-backbacon-65587.herokuapp.com/api/token/";
   }
 }

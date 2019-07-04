@@ -14,10 +14,10 @@ module.exports = function(deployer, network) {
   deployer.deploy(Token, proxyRegistryAddress, {gas: 5000000});
   
   // Uncomment this if you want initial item sale support.
-  deployer.deploy(Token, proxyRegistryAddress, {gas: 5000000}).then(() => {
-    return deployer.deploy(TokenFactory, proxyRegistryAddress, Token.address, {gas: 7000000});
-  }).then(async() => {
-    var token = await Token.deployed();
-    return token.transferOwnership(TokenFactory.address);
-  })
+  // deployer.deploy(Token, proxyRegistryAddress, {gas: 5000000}).then(() => {
+  //   return deployer.deploy(TokenFactory, proxyRegistryAddress, Token.address, {gas: 7000000});
+  // }).then(async() => {
+  //   var token = await Token.deployed();
+  //   return token.transferOwnership(TokenFactory.address);
+  // })
 };

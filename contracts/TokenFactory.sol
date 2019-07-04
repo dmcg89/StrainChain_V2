@@ -4,7 +4,9 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Factory.sol";
 import "./Token.sol";
 import "./Strings.sol";
-
+/**
+ * @title A Token tokin factor
+ */
 contract TokenFactory is Factory, Ownable {
   using Strings for string;
 
@@ -27,7 +29,7 @@ contract TokenFactory is Factory, Ownable {
   }
 
   function symbol() external view returns (string memory) {
-    return "RGBF";
+    return "SBT";
   }
 
   function supportsFactoryInterface() public view returns (bool) {

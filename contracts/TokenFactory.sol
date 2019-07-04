@@ -10,7 +10,7 @@ contract TokenFactory is Factory, Ownable {
 
   address public proxyRegistryAddress;
   address public nftAddress;
-  string public baseURI = "http://127.0.0.1:5000/api/factory/";
+  string public baseURI = "https://flannel-backbacon-65587.herokuapp.com/api/factory/";
 
   /**
    * @dev Enforce the existence of only 16,777,216 Tokens (2^24).
